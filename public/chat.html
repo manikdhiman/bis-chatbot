@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BIS Consultancy Services - Virtual Assistant</title>
+  <style>
+    :root { --primary: #0B5FFF; --bg: #F8FAFC; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { background: var(--bg); display: flex; align-items: center; justify-content: center; height: 100vh; }
+    .chat-box { width: 100%; max-width: 580px; height: 90vh; background: #FFF; border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+    .chat-header { background: var(--primary); color: #FFF; padding: 16px 20px; }
+    .chat-header h1 { font-size: 1.1rem; }
+    .chat-header p { font-size: 0.8rem; opacity: 0.9; }
+    .messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 0.92rem; line-height: 1.45; }
+    .msg.bot { background: #F1F5F9; color: #1E293B; align-self: flex-start; }
+    .msg.user { background: var(--primary); color: #FFF; align-self: flex-end; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 16px; }
+    .chip { background: #FFF; border: 1px solid var(--primary); color: var(--primary); border-radius: 16px; padding: 4px 12px; font-size: 0.8rem; cursor: pointer; }
+    .chip:hover { background: var(--primary); color: #FFF; }
+    .chat-bar { padding: 12px 16px; border-top: 1px solid #E2E8F0; display: flex; gap: 8px; }
+    .chat-bar input { flex: 1; padding: 10px 14px; border: 1px solid #CBD5E1; border-radius: 20px; outline: none; }
+    .chat-bar button { background: var(--primary); color: #FFF; border: none; border-radius: 20px; padding: 0 20px; font-weight: 600; cursor: pointer; }
+    @media(max-width: 600px) { .chat-box { height: 100vh; border-radius: 0; } }
+  </style>
+</head>
+<body>
+  <div class="chat-box">
+    <div class="chat-header">
+      <h1>BIS Assistant</h1>
+      <p>Product Certification & Compliance Support</p>
+    </div>
+    <div class="messages" id="msgs">
+      <div class="msg bot">Hello! Welcome to BIS Consultancy Services. How can I assist you with BIS, FMCS, or EPR approvals today?</div>
+    </div>
+    <div class="chips">
+      <button class="chip" onclick="quickSend('Our services')">Our services</button>
+      <button class="chip" onclick="quickSend('Get a quote')">Get a quote</button>
+      <button class="chip" onclick="quickSend('Contact details')">Contact details</button>
+      <button class="chip" onclick="quickSend('About BIS')">About BIS</button>
+    </div>
+    <div class="chat-bar">
+      <input type="text" id="userInput" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendMsg()" />
+      <button onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const msgs = document.getElementById('msgs');
+    const input = document.getElementById('userInput');
+    let history = [{ role: 'model', text: 'Hello! Welcome to BIS Consultancy Services. How can I assist you with BIS, FMCS, or EPR approvals today?' }];
+
+    function render(text, role) {
+      const el = document.createElement('div');
+      el.className = `msg ${role}`;
+      el.innerText = text;
+      msgs.appendChild(el);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    async function sendMsg() {
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      render(text, 'user');
+      history.push({ role: 'user', text });
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history })
+        });
+        const data = await res.json();
+        const reply = data.reply || "Could not reach server.";
+        render(reply, 'bot');
+        history.push({ role: 'model', text: reply });
+      } catch (err) {
+        render("Network connection error.", 'bot');
+      }
+    }
+
+    function quickSend(val) {
+      input.value = val;
+      sendMsg();
+    }
+  </script>
+</body>
+</html>

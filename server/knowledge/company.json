@@ -1,0 +1,57 @@
+{
+  "company_name": "BIS Consultancy Services",
+  "founder": "Mr. Rohit Sharma",
+  "year_of_establishment": 2024,
+  "nature_of_business": "Compliance and Product Certification Consulting Firm",
+  "team_size": "Below 20 People",
+  "about": "BIS Consultancy Services is an ISO-certified compliance and product certification consulting firm assisting manufacturers, importers, and exporters in obtaining approvals from the Bureau of Indian Standards (BIS) and other Indian regulatory bodies. They manage standard identification, laboratory testing, documentation, application filing, and factory inspection readiness.",
+  "core_services": [
+    {
+      "category": "BIS Certification",
+      "items": [
+        "ISI Mark Certification (Domestic Manufacturers)",
+        "FMCS (Foreign Manufacturers Certification Scheme)",
+        "CRS Registration (Compulsory Registration Scheme for Electronics & IT)",
+        "Scheme X Certification (Switchgear and Machinery)",
+        "QCO Compliance & Registrations for Toys, Footwear, Medical Textiles, and Furniture",
+        "License Renewal, Amendment, and Transfer"
+      ]
+    },
+    {
+      "category": "EPR (Extended Producer Responsibility) Compliance",
+      "items": [
+        "EPR Battery Waste Authorization",
+        "EPR Electronic Waste (E-waste) Authorization",
+        "EPR Plastic Packaging Waste Authorization",
+        "EPR Tyre Waste & Used Oil Authorization",
+        "EPR Non-Ferrous Metals Waste Authorization"
+      ]
+    },
+    {
+      "category": "Other Regulatory & Testing Support",
+      "items": [
+        "ISO Certification Consultancy",
+        "LMPC (Legal Metrology Packaged Commodities) Registration",
+        "OTR (Off-The-Road) Tire Certification",
+        "BIS-Recognized Laboratory Sample Testing Coordination",
+        "Pre-Audit Factory Inspection & Non-Conformity Closure"
+      ]
+    }
+  ],
+  "process": [
+    "1. Free Applicability Check: Identify applicable IS code, QCO order, or regulatory mandate.",
+    "2. Documentation: Prepare test requests, process flow charts, and factory setup files.",
+    "3. Lab Testing Coordination: Dispatch product samples to BIS-approved laboratories.",
+    "4. Application Filing: Submit verified applications on regulatory portals and follow up with officers.",
+    "5. Factory Audit Preparation: Provide on-site audit readiness support for ISI and FMCS schemes.",
+    "6. Grant of License: Hand over formal certification and manage routine renewals."
+  ],
+  "contact": {
+    "contact_person": "Mr. Rohit Sharma",
+    "phones": ["+91-9582284898", "+91-9821735141"],
+    "email": "indianbisconsultancyservices@gmail.com",
+    "address": "23EA, Street No-2, Rohini Sector 38, Delhi, India - 110081",
+    "hours": "Monday to Saturday, 9:30 AM to 6:30 PM IST"
+  },
+  "pricing": "Custom quotation based on product classification, testing requirements, and whether the facility is domestic or international."
+}
