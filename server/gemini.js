@@ -1,44 +1,49 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 const SYSTEM_PROMPT = require('./systemPrompt');
 
-const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || '').trim();
-const MODEL_NAME = (process.env.GEMINI_MODEL || 'gemini-2.0-flash').trim().replace(/[\x00-\x1F\x7F]/g, '');
-
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+let ai;
 
 async function callGemini(messages) {
-  if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY is missing in your .env file.');
+  const key = (process.env.GEMINI_API_KEY || '').trim();
+  const MODEL = (process.env.GEMINI_MODEL || 'gemini-2.0-flash').trim();
+
+  if (!key) {
+    throw new Error('GEMINI_API_KEY is missing. Put it in .env in the project root.');
+  }
+  
+  ai = ai || new GoogleGenAI({ apiKey: key });
+
+  // Gemini requires conversation history to begin strictly with a user turn
+  let turns = [...messages];
+  while (turns.length && turns[0].role !== 'user') {
+    turns.shift();
   }
 
+  const contents = turns.map(m => ({
+    role: m.role === 'user' ? 'user' : 'model',
+    parts: [{ text: m.text }]
+  }));
+
   try {
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      systemInstruction: SYSTEM_PROMPT
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents,
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        temperature: 0.3,
+        maxOutputTokens: 600
+      }
     });
 
-    const latestUserMessage = messages[messages.length - 1].text;
-    let rawHistory = messages.slice(0, -1);
-
-    // Ensure history strictly begins with a user turn
-    while (rawHistory.length > 0 && rawHistory[0].role !== 'user') {
-      rawHistory.shift();
+    const text = response.text;
+    if (!text) {
+      throw new Error('Gemini returned an empty response (possibly blocked by safety filters).');
     }
-
-    const formattedHistory = rawHistory.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.text }]
-    }));
-
-    const chat = model.startChat({
-      history: formattedHistory
-    });
-
-    const result = await chat.sendMessage(latestUserMessage);
-    const response = await result.response;
-    return response.text();
+    return text;
   } catch (err) {
-    console.error('--- GEMINI CALL FAILED ---', err.message);
+    console.error('--- GEMINI CALL FAILED ---');
+    console.error('Model:', MODEL);
+    console.error('Message:', err.message);
     throw err;
   }
 }

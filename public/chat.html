@@ -47,44 +47,81 @@
   </div>
 
   <script>
-    const msgs = document.getElementById('msgs');
-    const input = document.getElementById('userInput');
-    let history = [{ role: 'model', text: 'Hello! Welcome to BIS Consultancy Services. How can I assist you with BIS, FMCS, or EPR approvals today?' }];
+  const msgs = document.getElementById('msgs');
+  const input = document.getElementById('userInput');
+  let history = [{ role: 'model', text: 'Hello! Welcome to BIS Consultancy Services. How can I assist you with BIS, FMCS, or EPR approvals today?' }];
+  let sending = false;
 
-    function render(text, role) {
-      const el = document.createElement('div');
-      el.className = `msg ${role}`;
-      el.innerText = text;
-      msgs.appendChild(el);
-      msgs.scrollTop = msgs.scrollHeight;
-    }
+  function escapeHTML(str) {
+    return str.replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag));
+  }
 
-    async function sendMsg() {
-      const text = input.value.trim();
-      if (!text) return;
-      input.value = '';
-      render(text, 'user');
-      history.push({ role: 'user', text });
+  function formatText(text) {
+    let safe = escapeHTML(text);
+    // Replace **bold**
+    safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Replace * bullet points or linebreaks
+    safe = safe.replace(/\n\*\s/g, '<br>• ');
+    safe = safe.replace(/\n/g, '<br>');
+    return safe;
+  }
 
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: history })
-        });
-        const data = await res.json();
-        const reply = data.reply || "Could not reach server.";
-        render(reply, 'bot');
-        history.push({ role: 'model', text: reply });
-      } catch (err) {
-        render("Network connection error.", 'bot');
+  function render(text, role) {
+    const el = document.createElement('div');
+    el.className = `msg ${role}`;
+    el.innerHTML = formatText(text);
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  async function sendMsg() {
+    const text = input.value.trim();
+    if (!text || sending) return;
+    sending = true;
+    input.value = '';
+    render(text, 'user');
+    history.push({ role: 'user', text });
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
+
+      if (!res.ok || !data.reply) {
+        history.pop(); // Remove pending user turn on failure to keep turn integrity
+        const msg = res.status === 429
+          ? 'Too many messages, please wait a minute and try again.'
+          : 'Sorry, the assistant is having trouble right now. Please try again in a moment.';
+        render(msg, 'bot');
+        console.error('Server error response:', res.status, data);
+      } else {
+        render(data.reply, 'bot');
+        history.push({ role: 'model', text: data.reply });
       }
+    } catch (err) {
+      history.pop();
+      console.error('Fetch exception:', err);
+      render('Network connection error. Please check your internet and try again.', 'bot');
+    } finally {
+      sending = false;
     }
+  }
 
-    function quickSend(val) {
-      input.value = val;
-      sendMsg();
-    }
-  </script>
+  function quickSend(val) {
+    input.value = val;
+    sendMsg();
+  }
+</script>
 </body>
 </html>

@@ -4,12 +4,12 @@
   "description": "BIS Consultancy Services Chatbot & Embed Widget",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "nodemon server/index.js"
+    "start": "node --dns-result-order=ipv4first server/index.js",
+    "dev": "nodemon --exec \"node --dns-result-order=ipv4first\" server/index.js",
+    "check": "node --dns-result-order=ipv4first server/check.js"
   },
   "dependencies": {
-    "@google/genai": "^2.31.0",
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^0.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0"
